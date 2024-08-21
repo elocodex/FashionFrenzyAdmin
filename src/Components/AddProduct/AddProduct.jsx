@@ -54,7 +54,7 @@ const AddProduct = () => {
                 data.success?alert('Product Added'):alert('Failed')
             })
         }else{
-            console.log('Failed)
+            console.log('Failed')
         }
     }
   return (
