@@ -4,6 +4,7 @@ import uploadArea from '../../assets/upload_area.svg'
 
 const AddProduct = () => {
     const [image,setImage] = useState(false)
+    const [loading, setLoading]  = useState(false)
     const [productDetails,setProductDetails] = useState({
         name:"",
         image:"",
@@ -18,6 +19,7 @@ const AddProduct = () => {
         setProductDetails({...productDetails,[e.target.name]: e.target.value})
     }
     const addProduct = async ()=>{
+        setLoading(true)
         console.log(productDetails);
         let responseData;
         let product = productDetails;
@@ -26,35 +28,44 @@ const AddProduct = () => {
         formData.append('product',image);
 
         // Sending the form data to the api
-        await fetch('https://fashionfrenzybackend.onrender.com/upload', {
-            method:'POST',
-            headers:{
-                Accept: 'application/json',
-            },
-            body: formData
-        })
-        .then((resp) => resp.json())
-        .then((data)=>{responseData=data})
-        if(responseData.success = 1){
-            product.image = responseData.imageUrl
-            console.log(product);
-            // Received The product
-
-            // send the product to addproduct endpoint
-            console.log(JSON.stringify(product));
-            await fetch('https://fashionfrenzybackend.onrender.com/addproduct',{
-                method: 'POST',
+        try {
+            await fetch('https://fashionfrenzybackend.onrender.com/upload', {
+                method:'POST',
                 headers:{
                     Accept: 'application/json',
-                    'Content-Type':'application/json'
                 },
-                body: JSON.stringify(product),
-            }).then((res)=>res.json()).then((data)=>{
-                console.log("data "+data);
-                data.success?alert('Product Added'):alert('Failed')
+                body: formData
             })
-        }else{
-            console.log('Failed')
+            .then((resp) => resp.json())
+            .then((data)=>{responseData=data})
+            if(responseData.success = 1){
+                product.image = responseData.imageUrl
+                console.log(product);
+                // Received The product
+    
+                // send the product to addproduct endpoint
+                console.log(JSON.stringify(product));
+                await fetch('https://fashionfrenzybackend.onrender.com/addproduct',{
+                    method: 'POST',
+                    headers:{
+                        Accept: 'application/json',
+                        'Content-Type':'application/json'
+                    },
+                    body: JSON.stringify(product),
+                }).then((res)=>res.json())
+                .then((data)=>{
+                    console.log("data "+data);
+                    if(data.success){
+                        setLoading(false)
+                        alert("Product Added Successfully");
+                    }else{
+                        alert("Failed to add product");
+                    }
+                })
+            }
+        } catch (e) {
+            setLoading(false)
+            console.log(e.message);
         }
     }
   return (
@@ -87,7 +98,7 @@ const AddProduct = () => {
             </label>
             <input onChange={imgHandler} type="file" name='image' id='file-input' hidden />
         </div>
-        <button onClick={()=>{addProduct()}} className='addproduct-btn'>ADD</button>
+        <button onClick={()=>{addProduct()}} className='addproduct-btn'>{loading === true ? "Adding..." : "ADD"}</button>
     </div>
   )
 }
